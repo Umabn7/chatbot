@@ -1,7 +1,6 @@
 import random
 import streamlit as st
 
-# Define intents and responses
 intents = {
     "course_info": [
         "We offer solar energy, wind energy and waste management courses.",
@@ -37,7 +36,6 @@ intents = {
     ]
 }
 
-# Keyword-based intent matcher
 keywords = {
     "course_info": ["course", "training", "program"],
     "career_guidance": ["career", "job", "guidance"],
@@ -49,7 +47,6 @@ keywords = {
     "job_opportunities": ["job", "roles", "opportunity"]
 }
 
-# Function to get chatbot response
 def get_response(user_input):
     user_input = user_input.lower()
     for intent, words in keywords.items():
@@ -57,7 +54,7 @@ def get_response(user_input):
             return random.choice(intents[intent])
     return "Sorry, I didn't understand. Can you rephrase your question?"
 
-# Streamlit App
+
 def main():
     st.title("Green Chat Bot")
     st.subheader("Ask me about courses, career guidance, certifications, and more!")
