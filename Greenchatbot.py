@@ -45,10 +45,11 @@ intents = {
 
 def get_response(user_input):
     prediction = intent_classifier(user_input)[0]
+    print(f"Prediction: {prediction}")  
     intent = prediction['label'].lower()
     confidence = prediction['score']
 
-    if intent in intents and confidence > 0.4:
+    if intent in intents and confidence > 0.5:
         return random.choice(intents[intent])
     else:
         return "Sorry, I didn't understand. Can you rephrase your question?"
