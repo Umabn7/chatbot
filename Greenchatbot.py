@@ -1,16 +1,13 @@
-# chatbot_app.py
 from transformers import pipeline
 import random
 import streamlit as st
 
-# Load the text classification model
 @st.cache_resource
 def load_model():
     return pipeline("text-classification", model="bert-base-uncased")
 
 intent_classifier = load_model()
 
-# Define intents and responses
 intents = {
     "course_info": [
         "We offer solar energy, wind energy and waste management courses.",
@@ -46,7 +43,6 @@ intents = {
     ]
 }
 
-# Function to get chatbot response
 def get_response(user_input):
     prediction = intent_classifier(user_input)[0]
     intent = prediction['label'].lower()
@@ -57,7 +53,6 @@ def get_response(user_input):
     else:
         return "Sorry, I didn't understand. Can you rephrase your question?"
 
-# Streamlit App
 def main():
     st.title("Green Chat Bot")
     st.subheader("Ask me about courses, career guidance, certifications, and more!")
