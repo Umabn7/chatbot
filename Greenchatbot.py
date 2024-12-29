@@ -1,13 +1,7 @@
-from transformers import pipeline
 import random
 import streamlit as st
 
-@st.cache_resource
-def load_model():
-    return pipeline("text-classification", model="bert-base-uncased")
-
-intent_classifier = load_model()
-
+# Define intents and responses
 intents = {
     "course_info": [
         "We offer solar energy, wind energy and waste management courses.",
@@ -43,17 +37,27 @@ intents = {
     ]
 }
 
+# Keyword-based intent matcher
+keywords = {
+    "course_info": ["course", "training", "program"],
+    "career_guidance": ["career", "job", "guidance"],
+    "certification_help": ["certification", "certificate", "certified"],
+    "renewable_energy_advantages": ["advantages", "benefits", "pros"],
+    "renewable_energy_challenges": ["challenges", "problems", "issues"],
+    "environmental_tips": ["tips", "environment", "save"],
+    "renewable_energy_trends": ["trends", "latest", "update"],
+    "job_opportunities": ["job", "roles", "opportunity"]
+}
+
+# Function to get chatbot response
 def get_response(user_input):
-    prediction = intent_classifier(user_input)[0]
-    print(f"Prediction: {prediction}")  
-    intent = prediction['label'].lower()
-    confidence = prediction['score']
+    user_input = user_input.lower()
+    for intent, words in keywords.items():
+        if any(word in user_input for word in words):
+            return random.choice(intents[intent])
+    return "Sorry, I didn't understand. Can you rephrase your question?"
 
-    if intent in intents and confidence > 0.5:
-        return random.choice(intents[intent])
-    else:
-        return "Sorry, I didn't understand. Can you rephrase your question?"
-
+# Streamlit App
 def main():
     st.title("Green Chat Bot")
     st.subheader("Ask me about courses, career guidance, certifications, and more!")
