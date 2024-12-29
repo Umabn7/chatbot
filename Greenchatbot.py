@@ -48,7 +48,7 @@ def get_response(user_input):
     intent = prediction['label'].lower()
     confidence = prediction['score']
 
-    if intent in intents and confidence > 0.7:
+    if intent in intents and confidence > 0.4:
         return random.choice(intents[intent])
     else:
         return "Sorry, I didn't understand. Can you rephrase your question?"
