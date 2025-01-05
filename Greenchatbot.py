@@ -87,40 +87,54 @@ def predict_intent(text):
 def get_response(intent):
     if intent in responses:
         bot_response = random.choice(responses[intent])
-        # Add a fun fact after every response
-        fun_fact = random.choice(fun_facts)
-        return f"{bot_response}\n\nFun Fact: {fun_fact}"
+        return bot_response
     return "I'm sorry, I didn't quite catch that. Could you rephrase?"
 
 # Streamlit app
 def main():
+    st.set_page_config(page_title="Green Chat Bot", page_icon="🌿", layout="wide")
+    
+    # Sidebar for navigation
     st.sidebar.title("Navigation")
     app_mode = st.sidebar.radio("Go to", ["Home", "Chat History", "About"])
 
     if app_mode == "Home":
+        # Home page for chatting
         st.title("🌿 Green Chat Bot 🌿")
         st.subheader("Ask me about renewable energy, certifications, careers, and more!")
-
+        st.markdown("___")
+        
         if "chat_history" not in st.session_state:
             st.session_state.chat_history = []
+        
+        user_input = st.text_input("Your message:", key="user_input", label_visibility="collapsed")
 
-        user_input = st.text_input("Your message:")
+        col1, col2 = st.columns([6, 1])
+        with col2:
+            if st.button("Send"):
+                if user_input.strip():
+                    intent = predict_intent(user_input)
+                    response = get_response(intent)
 
-        if st.button("Send"):
-            if user_input.strip():
-                intent = predict_intent(user_input)
-                response = get_response(intent)
+                    # Save to chat history
+                    st.session_state.chat_history.append(("You", user_input))
+                    st.session_state.chat_history.append(("Bot", response))
 
-                # Save to chat history
-                st.session_state.chat_history.append(("You", user_input))
-                st.session_state.chat_history.append(("Bot", response))
+                    # Optionally, show fun fact after every 2nd interaction
+                    if len(st.session_state.chat_history) % 4 == 0:  # After every 2 exchanges
+                        fun_fact = random.choice(fun_facts)
+                        response += f"\n\n**Fun Fact:** {fun_fact}"
 
-                st.write("### Bot Response")
-                st.markdown(f"**Bot:** {response}")
-            else:
-                st.warning("Please enter a message to chat!")
+                    # Display response
+                    st.write("### Bot Response")
+                    st.markdown(f"**Bot:** {response}")
+                else:
+                    st.warning("Please enter a message to chat!")
+
+        st.markdown("___")
 
     elif app_mode == "Chat History":
+        # Chat history page
         st.title("📜 Chat History")
         if "chat_history" in st.session_state and st.session_state.chat_history:
             for sender, message in st.session_state.chat_history:
@@ -131,19 +145,29 @@ def main():
         else:
             st.info("No chat history found. Start a conversation on the Home page!")
 
-    elif app_mode == "About":
-        st.title("About Green Chat Bot")
-        st.write("""
-        🌱 **Green Chat Bot** is an interactive assistant designed to help you learn about renewable energy, certifications, 
-        job opportunities, and more. 
+        st.markdown("___")
 
-        🤖 Features:
+    elif app_mode == "About":
+        # About page
+        st.title("About Green Chat Bot")
+        st.markdown("""
+        🌱 **Green Chat Bot** is an interactive assistant designed to help you learn about renewable energy, certifications, 
+        job opportunities, and more.
+
+        ### 🤖 Features:
         - Answer queries about renewable energy.
         - Provide career guidance.
         - Share fun facts about sustainability.
+        - Improve the chat experience using NLP.
 
-        Built with **Streamlit** and **spaCy**.
+        **Technologies**:
+        - Built with **Streamlit** for the interface.
+        - Powered by **spaCy** for natural language processing.
+
+        Thank you for using the Green Chat Bot! 🌍💡
         """)
+
+        st.markdown("___")
 
 if __name__ == "__main__":
     main()
