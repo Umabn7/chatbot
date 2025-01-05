@@ -2,7 +2,6 @@ import random
 import spacy
 from spacy.training import Example
 import streamlit as st
-import time
 
 # Enhanced training data
 training_data = [
@@ -111,7 +110,7 @@ def predict_intent(text, threshold=0.5):
         return "irrelevant"  # If confidence is low, classify as irrelevant
     return predicted_label
 
-# Get response with fun fact timing
+# Get response with fun fact randomly
 def get_response(intent):
     if intent == "irrelevant":
         return "I'm sorry, I didn't quite catch that. Could you rephrase?"
@@ -120,14 +119,9 @@ def get_response(intent):
     if intent in responses:
         bot_response = random.choice(responses[intent])
         
-        # Use session state to track fun fact timing
-        if "last_fun_fact_time" not in st.session_state:
-            st.session_state.last_fun_fact_time = time.time()
-
-        # Give fun fact every 30 seconds
-        if time.time() - st.session_state.last_fun_fact_time > 30:
+        # Add fun fact randomly
+        if random.random() < 0.2:  # 20% chance to add a fun fact
             fun_fact = random.choice(fun_facts)
-            st.session_state.last_fun_fact_time = time.time()
             return f"{bot_response}\n\nFun Fact: {fun_fact}"
 
         return bot_response
