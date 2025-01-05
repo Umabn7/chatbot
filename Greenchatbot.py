@@ -96,9 +96,13 @@ def train_spacy_model():
 nlp_model = train_spacy_model()
 
 # Predict intent with confidence threshold
-def predict_intent(text, threshold=0.7):
+def predict_intent(text, threshold=0.5):  # Lowered threshold
     doc = nlp_model(text)
     predicted_label, confidence = max(doc.cats.items(), key=lambda item: item[1])
+
+    # Debugging: print the confidence of predictions for debugging
+    print(f"Prediction: {predicted_label}, Confidence: {confidence}")
+    
     if confidence < threshold:
         return "irrelevant"  # If confidence is low, classify as irrelevant
     return predicted_label
