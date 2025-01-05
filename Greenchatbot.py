@@ -2,6 +2,7 @@ import random
 import spacy
 from spacy.training import Example
 import streamlit as st
+import time
 
 # Training data
 training_data = [
@@ -94,19 +95,34 @@ def train_spacy_model():
 # Load model
 nlp_model = train_spacy_model()
 
-# Predict intent
-def predict_intent(text):
+# Predict intent with confidence threshold
+def predict_intent(text, threshold=0.7):
     doc = nlp_model(text)
-    predicted_label = max(doc.cats, key=doc.cats.get)
+    predicted_label, confidence = max(doc.cats.items(), key=lambda item: item[1])
+    if confidence < threshold:
+        return "irrelevant"  # If confidence is low, classify as irrelevant
     return predicted_label
 
-# Get response
+# Get response with fun fact timing
 def get_response(intent):
+    if intent == "irrelevant":
+        return "I'm sorry, I didn't quite catch that. Could you rephrase?"
+    
+    # Select response based on intent
     if intent in responses:
         bot_response = random.choice(responses[intent])
-        # Add a fun fact after every response
-        fun_fact = random.choice(fun_facts)
-        return f"{bot_response}\n\nFun Fact: {fun_fact}"
+        
+        # Use session state to track fun fact timing
+        if "last_fun_fact_time" not in st.session_state:
+            st.session_state.last_fun_fact_time = time.time()
+
+        # Give fun fact every 30 seconds
+        if time.time() - st.session_state.last_fun_fact_time > 30:
+            fun_fact = random.choice(fun_facts)
+            st.session_state.last_fun_fact_time = time.time()
+            return f"{bot_response}\n\nFun Fact: {fun_fact}"
+
+        return bot_response
     return "I'm sorry, I didn't quite catch that. Could you rephrase?"
 
 # Streamlit app
@@ -126,6 +142,7 @@ def main():
         if st.button("Send"):
             if user_input.strip():
                 intent = predict_intent(user_input)
+
                 response = get_response(intent)
 
                 # Save to chat history
