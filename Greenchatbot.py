@@ -83,44 +83,67 @@ def predict_intent(text):
     predicted_label = max(doc.cats, key=doc.cats.get)
     return predicted_label
 
-# Get response with fun facts after every reply
+# Get response
 def get_response(intent):
     if intent in responses:
         bot_response = random.choice(responses[intent])
         # Add a fun fact after every response
         fun_fact = random.choice(fun_facts)
         return f"{bot_response}\n\nFun Fact: {fun_fact}"
-    else:
-        return "I'm sorry, I didn't quite catch that. Could you rephrase?"
+    return "I'm sorry, I didn't quite catch that. Could you rephrase?"
 
 # Streamlit app
 def main():
-    st.title("🌿 Green Chat Bot 🌿")
-    st.subheader("Ask me about renewable energy, certifications, careers, and more!")
+    st.sidebar.title("Navigation")
+    app_mode = st.sidebar.radio("Go to", ["Home", "Chat History", "About"])
 
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
+    if app_mode == "Home":
+        st.title("🌿 Green Chat Bot 🌿")
+        st.subheader("Ask me about renewable energy, certifications, careers, and more!")
 
-    user_input = st.text_input("Your message:")
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = []
 
-    if st.button("Send"):
-        if user_input.strip():
-            intent = predict_intent(user_input)
-            response = get_response(intent)
+        user_input = st.text_input("Your message:")
 
-            # Save to chat history
-            st.session_state.chat_history.append(("You", user_input))
-            st.session_state.chat_history.append(("Bot", response))
+        if st.button("Send"):
+            if user_input.strip():
+                intent = predict_intent(user_input)
+                response = get_response(intent)
 
-            # Display chat history
-            st.write("### Chat History")
+                # Save to chat history
+                st.session_state.chat_history.append(("You", user_input))
+                st.session_state.chat_history.append(("Bot", response))
+
+                st.write("### Bot Response")
+                st.markdown(f"**Bot:** {response}")
+            else:
+                st.warning("Please enter a message to chat!")
+
+    elif app_mode == "Chat History":
+        st.title("📜 Chat History")
+        if "chat_history" in st.session_state and st.session_state.chat_history:
             for sender, message in st.session_state.chat_history:
-                st.markdown(f"**{sender}:** {message}")
+                if sender == "You":
+                    st.markdown(f"**{sender}:** {message}")
+                else:
+                    st.markdown(f"**{sender}:** {message}")
         else:
-            st.warning("Please enter a message to chat!")
+            st.info("No chat history found. Start a conversation on the Home page!")
 
-    st.markdown("---")
-    st.markdown("Thank you for chatting! 🌱")
+    elif app_mode == "About":
+        st.title("About Green Chat Bot")
+        st.write("""
+        🌱 **Green Chat Bot** is an interactive assistant designed to help you learn about renewable energy, certifications, 
+        job opportunities, and more. 
+
+        🤖 Features:
+        - Answer queries about renewable energy.
+        - Provide career guidance.
+        - Share fun facts about sustainability.
+
+        Built with **Streamlit** and **spaCy**.
+        """)
 
 if __name__ == "__main__":
     main()
