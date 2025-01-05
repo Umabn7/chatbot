@@ -83,11 +83,15 @@ def predict_intent(text):
     predicted_label = max(doc.cats, key=doc.cats.get)
     return predicted_label
 
-# Get response
+# Get response with fun facts after every reply
 def get_response(intent):
     if intent in responses:
-        return random.choice(responses[intent])
-    return "I'm sorry, I didn't quite catch that. Could you rephrase?"
+        bot_response = random.choice(responses[intent])
+        # Add a fun fact after every response
+        fun_fact = random.choice(fun_facts)
+        return f"{bot_response}\n\nFun Fact: {fun_fact}"
+    else:
+        return "I'm sorry, I didn't quite catch that. Could you rephrase?"
 
 # Streamlit app
 def main():
@@ -108,18 +112,10 @@ def main():
             st.session_state.chat_history.append(("You", user_input))
             st.session_state.chat_history.append(("Bot", response))
 
-            # Optionally add a fun fact for variety
-            if random.random() < 0.3:  # 30% chance to add a fun fact
-                fun_fact = random.choice(fun_facts)
-                st.session_state.chat_history.append(("Bot", f"Fun Fact: {fun_fact}"))
-
             # Display chat history
             st.write("### Chat History")
             for sender, message in st.session_state.chat_history:
-                if sender == "You":
-                    st.markdown(f"**{sender}:** {message}")
-                else:
-                    st.markdown(f"**{sender}:** {message}")
+                st.markdown(f"**{sender}:** {message}")
         else:
             st.warning("Please enter a message to chat!")
 
