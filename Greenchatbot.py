@@ -60,18 +60,35 @@ fun_facts = [
 
 # Train spaCy model
 def train_spacy_model():
+    # Create a blank English NLP model
     nlp = spacy.blank("en")
+    
+    # Add text classification pipe to the model
     textcat = nlp.add_pipe("textcat", last=True)
+    
+    # Add labels to the text classifier
     for _, label in training_data:
         textcat.add_label(label)
+    
+    # Start training
     optimizer = nlp.begin_training()
-    for _ in range(10):
+
+    # Training loop for multiple iterations
+    for epoch in range(20):  # Increased the number of epochs for better learning
         random.shuffle(training_data)
         losses = {}
+        
         for text, label in training_data:
+            # Create a doc from the input text
             doc = nlp.make_doc(text)
+            # Create an Example object to represent the input/output pair
             example = Example.from_dict(doc, {"cats": {label: 1.0}})
+            # Update the model with the example and calculate losses
             nlp.update([example], losses=losses, drop=0.2, sgd=optimizer)
+
+        # Print the loss after every epoch for monitoring the training
+        print(f"Epoch {epoch} Losses {losses}")
+        
     return nlp
 
 # Load model
