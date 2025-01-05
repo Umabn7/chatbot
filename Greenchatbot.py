@@ -18,38 +18,45 @@ training_data = [
 
 responses = {
     "course_info": [
-        "We offer solar energy, wind energy, and waste management courses.",
-        "Our courses include solar, wind energy, and waste management. Learn and grow!"
+        "We offer courses on solar energy, wind energy, and waste management.",
+        "Our training programs include solar energy, wind energy, and waste management. Learn and grow!"
     ],
     "career_guidance": [
-        "The field of renewable energy is in high demand. Would you like suggestions for certifications?",
-        "Green energy careers are booming! Popular roles include sustainability analyst and energy consultant."
+        "The renewable energy field is booming! Would you like suggestions for certifications or job roles?",
+        "Green energy careers are in high demand. Roles like sustainability analyst and energy consultant are popular!"
     ],
     "certification_help": [
-        "You can apply for certifications. Would you like a link?",
-        "Green certifications can boost your career. Apply today!"
+        "You can apply for certifications in renewable energy. Would you like a link?",
+        "Green certifications are great for boosting your career. Learn more and get certified!"
     ],
     "renewable_energy_advantages": [
-        "Renewable energy reduces carbon emissions and helps combat climate change.",
-        "Lower electricity bills and promote energy independence with renewables!"
+        "Renewable energy helps combat climate change by reducing carbon emissions.",
+        "Using renewable energy can lower your electricity bills and promote energy independence."
     ],
     "renewable_energy_challenges": [
-        "Challenges include high setup costs and weather dependency.",
-        "Infrastructure and storage are key challenges in renewable energy adoption."
+        "Challenges include high initial setup costs and weather dependency.",
+        "Infrastructure and energy storage solutions remain critical challenges in renewable energy adoption."
     ],
     "environmental_tips": [
-        "Save energy by switching off appliances when not in use.",
-        "Reduce waste by reusing and recycling materials wherever possible."
+        "Switch off appliances when not in use to save energy.",
+        "Reuse and recycle materials wherever possible to reduce waste."
     ],
     "renewable_energy_trends": [
-        "Solar and wind energy are leading the global renewable energy revolution.",
-        "Battery storage and green hydrogen are emerging trends in renewable energy."
+        "Solar and wind energy are driving the renewable energy revolution.",
+        "Battery storage and green hydrogen are emerging as the next big trends in renewable energy."
     ],
     "job_opportunities": [
-        "Popular roles: Renewable energy engineer, solar technician, and energy auditor.",
-        "The demand for professionals in green energy fields is growing rapidly!"
+        "Popular roles include renewable energy engineer, solar technician, and energy auditor.",
+        "The demand for skilled professionals in renewable energy is rapidly growing worldwide."
     ],
 }
+
+fun_facts = [
+    "Did you know? The energy from the sun in one hour is enough to power the Earth for a year!",
+    "Wind turbines can reach heights taller than the Statue of Liberty!",
+    "Recycling one aluminum can saves enough energy to power a TV for three hours.",
+    "Hydropower is the oldest form of renewable energy, dating back to ancient Greece!"
+]
 
 # Train spaCy model
 def train_spacy_model():
@@ -78,33 +85,46 @@ def predict_intent(text):
 
 # Get response
 def get_response(intent):
-    return random.choice(responses[intent]) if intent in responses else "Sorry, I didn't understand. Can you rephrase?"
+    if intent in responses:
+        return random.choice(responses[intent])
+    return "I'm sorry, I didn't quite catch that. Could you rephrase?"
 
 # Streamlit app
 def main():
     st.title("🌿 Green Chat Bot 🌿")
-    st.subheader("Ask me about courses, careers, certifications, and more!")
+    st.subheader("Ask me about renewable energy, certifications, careers, and more!")
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    user_input = st.text_input("Your message:", key="user_input")
+    user_input = st.text_input("Your message:")
 
     if st.button("Send"):
         if user_input.strip():
             intent = predict_intent(user_input)
             response = get_response(intent)
 
-            # Store conversation history
+            # Save to chat history
             st.session_state.chat_history.append(("You", user_input))
             st.session_state.chat_history.append(("Bot", response))
+
+            # Optionally add a fun fact for variety
+            if random.random() < 0.3:  # 30% chance to add a fun fact
+                fun_fact = random.choice(fun_facts)
+                st.session_state.chat_history.append(("Bot", f"Fun Fact: {fun_fact}"))
 
             # Display chat history
             st.write("### Chat History")
             for sender, message in st.session_state.chat_history:
-                st.markdown(f"**{sender}:** {message}")
+                if sender == "You":
+                    st.markdown(f"**{sender}:** {message}")
+                else:
+                    st.markdown(f"**{sender}:** {message}")
         else:
             st.warning("Please enter a message to chat!")
+
+    st.markdown("---")
+    st.markdown("Thank you for chatting! 🌱")
 
 if __name__ == "__main__":
     main()
