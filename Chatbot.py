@@ -1,8 +1,7 @@
 import random
-import streamlit as st
-import time
 import spacy
 from spacy.training import Example
+import streamlit as st
 
 # Training data
 training_data = [
@@ -14,7 +13,7 @@ training_data = [
     ("What are the benefits of renewable energy?", "renewable_energy_advantages"),
     ("What are the challenges of renewable energy?", "renewable_energy_challenges"),
     ("Can you give me environmental tips?", "environmental_tips"),
-    ("What are the latest trends in renewable energy?", "renewable_energy_trends")
+    ("What are the latest trends in renewable energy?", "renewable_energy_trends"),
 ]
 
 responses = {
@@ -49,7 +48,7 @@ responses = {
     "job_opportunities": [
         "🛠️ Popular roles: Renewable energy engineer, solar technician, and energy auditor.",
         "📈 The demand for professionals in green energy fields is growing rapidly!"
-    ]
+    ],
 }
 
 fun_facts = [
@@ -87,14 +86,6 @@ def predict_intent(text):
 def get_response(intent):
     return random.choice(responses[intent]) if intent in responses else "🤔 Sorry, I didn't understand. Can you rephrase?"
 
-# Typing effect
-def typing_effect(text):
-    output = st.empty()
-    for i in range(len(text) + 1):
-        output.markdown(text[:i] + "▌")
-        time.sleep(0.05)
-    output.markdown(text)
-
 # Streamlit app
 def main():
     st.markdown("<h1 style='text-align: center; color: green;'>🌿 Green Chat Bot 🌿</h1>", unsafe_allow_html=True)
@@ -114,12 +105,18 @@ def main():
             st.session_state.chat_history.append(("You", user_input))
             st.session_state.chat_history.append(("Bot", response))
 
-            # Display chat history
+            # Display chat history with a simulated dynamic animation
+            st.write("### Chat History")
             for sender, message in st.session_state.chat_history:
                 if sender == "You":
                     st.markdown(f"**{sender}:** {message}")
                 else:
-                    typing_effect(f"**{sender}:** {message}")
+                    # Simulated typing effect with ellipsis
+                    placeholder = st.empty()
+                    for _ in range(3):
+                        placeholder.markdown(f"**{sender}:** {message[:5]}{'...' * _}")
+                        st.experimental_rerun()  # Refresh Streamlit rendering
+                    placeholder.markdown(f"**{sender}:** {message}")
 
             # Randomly share a fun fact
             if random.random() < 0.3:  # 30% chance to share a fun fact
