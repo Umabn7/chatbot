@@ -131,14 +131,9 @@ def main():
                     st.session_state.chat_history.append(("You", user_input))
                     st.session_state.chat_history.append(("Bot", response))
 
-                    # Optionally, show fun fact after every 2nd interaction
-                    if len(st.session_state.chat_history) % 4 == 0:  # After every 2 exchanges
-                        fun_fact = random.choice(fun_facts)
-                        response += f"\n\n**Fun Fact:** {fun_fact}"
-
-                    # Display response with improved visibility
+                    # Display response
                     st.write("### Bot Response")
-                    st.markdown(f"<div style='background-color: #e0f7fa; padding: 10px; border-radius: 10px; border: 2px solid #00796b; font-size: 1.2em;'>**Bot:** {response}</div>", unsafe_allow_html=True)
+                    st.markdown(f"**Bot:** {response}")
                 else:
                     st.warning("Please enter a message to chat!")
 
