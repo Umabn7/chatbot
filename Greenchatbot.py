@@ -22,6 +22,26 @@ training_data = [
     ("What are the latest trends in renewable energy?", "renewable_energy_trends"),
     ("Can you help me with my career path?", "career_guidance"),
     ("How do I pursue a career in renewable energy?", "career_guidance"),
+    ("Hi", "greeting"),
+    ("Hello", "greeting"),
+    ("Good morning", "greeting"),
+    ("Good evening", "greeting"),
+    ("How are you?", "greeting"),
+    ("What’s up?", "greeting"),
+    ("Bye", "goodbye"),
+    ("See you later", "goodbye"),
+    ("Goodbye", "goodbye"),
+    ("Thanks", "thank_you"),
+    ("Thank you", "thank_you"),
+    ("Thanks for your help", "thank_you"),
+    ("Can you help with climate change?", "climate_change"),
+    ("What can we do to reduce carbon emissions?", "climate_change"),
+    ("Tell me about sustainable practices", "sustainable_practices"),
+    ("How can I save energy in my home?", "energy_saving_tips"),
+    ("How do solar panels work?", "solar_panels_info"),
+    ("How can I reduce my carbon footprint?", "carbon_footprint"),
+    ("Tell me about electric vehicles", "electric_vehicles"),
+    ("How do wind turbines work?", "wind_turbines_info"),
 ]
 
 responses = {
@@ -57,13 +77,58 @@ responses = {
         "Popular roles include renewable energy engineer, solar technician, and energy auditor.",
         "The demand for skilled professionals in renewable energy is rapidly growing worldwide."
     ],
+    "greeting": [
+        "Hello! How can I assist you in your green energy journey today?",
+        "Hi! I'm here to help you with all things renewable energy and sustainability!",
+        "Good day! How can I help you with renewable energy today?"
+    ],
+    "goodbye": [
+        "Goodbye! Stay green and sustainable!",
+        "See you later! Keep working towards a greener future!"
+    ],
+    "thank_you": [
+        "You're welcome! I'm always here to help.",
+        "Glad I could assist! Feel free to reach out anytime."
+    ],
+    "climate_change": [
+        "To combat climate change, it's crucial to reduce carbon emissions and switch to renewable energy sources.",
+        "Fighting climate change involves global efforts like transitioning to clean energy and reducing waste."
+    ],
+    "sustainable_practices": [
+        "Sustainable practices include using renewable energy, reducing waste, and conserving water.",
+        "Consider reducing your environmental impact by adopting eco-friendly practices like recycling and supporting green businesses."
+    ],
+    "energy_saving_tips": [
+        "To save energy, consider switching to energy-efficient appliances and using natural light whenever possible.",
+        "Unplug devices when not in use, and try to use energy-efficient lighting like LED bulbs."
+    ],
+    "solar_panels_info": [
+        "Solar panels convert sunlight into electricity using photovoltaic cells, providing a clean and renewable energy source.",
+        "With solar energy, you can reduce your electricity bills while contributing to a greener planet!"
+    ],
+    "carbon_footprint": [
+        "You can reduce your carbon footprint by driving less, using public transport, and switching to renewable energy sources.",
+        "Eating less meat, reducing waste, and using less plastic are other great ways to lower your carbon footprint."
+    ],
+    "electric_vehicles": [
+        "Electric vehicles (EVs) run on electricity and produce zero emissions, making them an excellent choice for reducing your carbon footprint.",
+        "The adoption of electric vehicles is one of the key strategies to combat climate change."
+    ],
+    "wind_turbines_info": [
+        "Wind turbines harness the power of wind to generate electricity. They are a key component of renewable energy infrastructure.",
+        "As the wind blows, the blades of the turbine spin, which drives a generator that produces electricity."
+    ],
 }
 
 fun_facts = [
     "Did you know? The energy from the sun in one hour is enough to power the Earth for a year!",
     "Wind turbines can reach heights taller than the Statue of Liberty!",
     "Recycling one aluminum can saves enough energy to power a TV for three hours.",
-    "Hydropower is the oldest form of renewable energy, dating back to ancient Greece!"
+    "Hydropower is the oldest form of renewable energy, dating back to ancient Greece!",
+    "The largest solar farm in the world is located in the Mojave Desert, California.",
+    "It takes about 10 years for a wind turbine to offset the carbon emissions it took to manufacture it.",
+    "A single solar panel can power a lightbulb for over 10 hours!",
+    "The largest wind turbine in the world is over 220 meters tall!"
 ]
 
 # Train spaCy model with more epochs and improved data
@@ -133,57 +198,39 @@ def get_response(intent):
 
 # Streamlit app
 def main():
-    st.sidebar.title("Navigation")
-    app_mode = st.sidebar.radio("Go to", ["Home", "Chat History", "About"])
+    st.title("Renewable Energy Assistant")
+    st.write("Welcome! Ask me anything about renewable energy, sustainability, and more.")
+    
+    # Create columns for the navigation tiles
+    col1, col2, col3 = st.columns(3)
 
-    if app_mode == "Home":
-        st.title("🌿 Green Chat Bot 🌿")
-        st.subheader("Ask me about renewable energy, certifications, careers, and more!")
+    # Create clickable tiles
+    with col1:
+        if st.button("Home"):
+            st.session_state.page = "Home"
+    with col2:
+        if st.button("Chat History"):
+            st.session_state.page = "Chat History"
+    with col3:
+        if st.button("About"):
+            st.session_state.page = "About"
 
-        if "chat_history" not in st.session_state:
-            st.session_state.chat_history = []
+    if "page" not in st.session_state:
+        st.session_state.page = "Home"
 
-        user_input = st.text_input("Your message:")
+    if st.session_state.page == "Home":
+        user_input = st.text_input("Ask a question:")
+        if user_input:
+            intent = predict_intent(user_input)
+            response = get_response(intent)
+            st.write(response)
 
-        if st.button("Send"):
-            if user_input.strip():
-                intent = predict_intent(user_input)
+    elif st.session_state.page == "Chat History":
+        st.write("Here you can view the chat history!")
+        # Add functionality to view chat history
 
-                response = get_response(intent)
-
-                # Save to chat history
-                st.session_state.chat_history.append(("You", user_input))
-                st.session_state.chat_history.append(("Bot", response))
-
-                st.write("### Bot Response")
-                st.markdown(f"**Bot:** {response}")
-            else:
-                st.warning("Please enter a message to chat!")
-
-    elif app_mode == "Chat History":
-        st.title("📜 Chat History")
-        if "chat_history" in st.session_state and st.session_state.chat_history:
-            for sender, message in st.session_state.chat_history:
-                if sender == "You":
-                    st.markdown(f"**{sender}:** {message}")
-                else:
-                    st.markdown(f"**{sender}:** {message}")
-        else:
-            st.info("No chat history found. Start a conversation on the Home page!")
-
-    elif app_mode == "About":
-        st.title("About Green Chat Bot")
-        st.write("""
-        🌱 **Green Chat Bot** is an interactive assistant designed to help you learn about renewable energy, certifications, 
-        job opportunities, and more. 
-
-        🤖 Features:
-        - Answer queries about renewable energy.
-        - Provide career guidance.
-        - Share fun facts about sustainability.
-
-        Built with **Streamlit** and **spaCy**.
-        """)
+    elif st.session_state.page == "About":
+        st.write("This chatbot is designed to help you with information on renewable energy, sustainability, and more. Ask away!")
 
 if __name__ == "__main__":
     main()
