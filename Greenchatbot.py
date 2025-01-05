@@ -14,9 +14,6 @@ training_data = [
     ("What are the challenges of renewable energy?", "renewable_energy_challenges"),
     ("Can you give me environmental tips?", "environmental_tips"),
     ("What are the latest trends in renewable energy?", "renewable_energy_trends"),
-    ("What is renewable energy?", "renewable_energy_advantages"),
-    ("Tell me a joke!", "irrelevant"),
-    ("What do you think about pizza?", "irrelevant"),
 ]
 
 responses = {
@@ -52,10 +49,6 @@ responses = {
         "Popular roles include renewable energy engineer, solar technician, and energy auditor.",
         "The demand for skilled professionals in renewable energy is rapidly growing worldwide."
     ],
-    "irrelevant": [
-        "I'm sorry, I didn't quite catch that. Could you rephrase?",
-        "I didn't understand your question. Can you please clarify?"
-    ]
 }
 
 fun_facts = [
@@ -88,17 +81,15 @@ nlp_model = train_spacy_model()
 def predict_intent(text):
     doc = nlp_model(text)
     predicted_label = max(doc.cats, key=doc.cats.get)
-    
-    # If confidence is below threshold, return 'irrelevant' (indicating the bot can't understand)
-    if doc.cats[predicted_label] < 0.5:  # Adjust threshold as necessary
-        return "irrelevant"
-    
     return predicted_label
 
 # Get response
 def get_response(intent):
     if intent in responses:
-        return random.choice(responses[intent])
+        bot_response = random.choice(responses[intent])
+        # Add a fun fact after every response
+        fun_fact = random.choice(fun_facts)
+        return f"{bot_response}\n\nFun Fact: {fun_fact}"
     return "I'm sorry, I didn't quite catch that. Could you rephrase?"
 
 # Streamlit app
@@ -131,9 +122,14 @@ def main():
                     st.session_state.chat_history.append(("You", user_input))
                     st.session_state.chat_history.append(("Bot", response))
 
-                    # Display response
-                    st.write("### Bot Response")
-                    st.markdown(f"**Bot:** {response}")
+                    # Display response with improved visibility
+                    with st.container():
+                        st.write("### Bot Response")
+                        st.markdown(f"""
+                        <div style="background-color: #e0f7fa; padding: 20px; border-radius: 10px; border: 2px solid #00796b; font-size: 1.2em; font-weight: bold; max-width: 600px; word-wrap: break-word;">
+                            **Bot:** {response}
+                        </div>
+                        """, unsafe_allow_html=True)
                 else:
                     st.warning("Please enter a message to chat!")
 
