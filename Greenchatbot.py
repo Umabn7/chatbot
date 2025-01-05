@@ -3,7 +3,7 @@ import spacy
 from spacy.training import Example
 import streamlit as st
 
-# Enhanced training data with more specific examples including greetings
+# Enhanced training data with trivia/quiz questions
 training_data = [
     ("Tell me about your courses", "course_info"),
     ("What training programs do you offer?", "course_info"),
@@ -29,6 +29,7 @@ training_data = [
     ("Hey", "greeting"),
     ("How are you?", "greeting"),
     ("What's up?", "greeting"),
+    ("Quiz me on renewable energy", "quiz_request"),
 ]
 
 responses = {
@@ -65,10 +66,14 @@ responses = {
         "The demand for skilled professionals in renewable energy is rapidly growing worldwide."
     ],
     "greeting": [
-        "Hello there! How can I assist you today with renewable energy questions?",
+        "Hello there! How can I assist you today?",
         "Hi! How can I help you with your renewable energy questions?",
         "Good day! What can I do for you?",
         "Hey! What would you like to know about renewable energy?"
+    ],
+    "quiz_request": [
+        "Sure! Here's your trivia question about renewable energy:",
+        "Let's test your knowledge on renewable energy!"
     ],
 }
 
@@ -80,6 +85,15 @@ fun_facts = [
     "Solar energy can be harnessed anywhere the sun shines, from deserts to rooftops!",
     "By 2050, renewable energy could power the entire world if we make the switch!",
     "The world's largest solar park, the Bhadla Solar Park in India, can generate 2,245 MW!",
+]
+
+# Trivia/quiz questions and answers
+quiz_data = [
+    {"question": "What is the most widely used renewable energy source?", "answer": "solar"},
+    {"question": "Which renewable energy source is harnessed from the wind?", "answer": "wind"},
+    {"question": "Which renewable energy source involves converting water flow into energy?", "answer": "hydropower"},
+    {"question": "What is the primary gas contributing to global warming?", "answer": "carbon dioxide"},
+    {"question": "Which renewable energy source is generated from organic materials?", "answer": "biomass"},
 ]
 
 # Train spaCy model with more epochs and improved data
@@ -131,7 +145,7 @@ def predict_intent(text, threshold=0.5):
     return predicted_label
 
 # Get response with fun fact randomly
-def get_response(intent):
+def get_response(intent, score=None):
     if intent == "irrelevant":
         return "I'm sorry, I didn't quite catch that. Could you rephrase?"
     
@@ -150,7 +164,7 @@ def get_response(intent):
 # Streamlit app
 def main():
     st.sidebar.title("Navigation")
-    app_mode = st.sidebar.radio("Go to", ["Home", "Chat History", "About"])
+    app_mode = st.sidebar.radio("Go to", ["Home", "Chat History", "About", "Trivia"])
 
     if app_mode == "Home":
         st.title("🌿 Green Chat Bot 🌿")
@@ -176,6 +190,21 @@ def main():
             else:
                 st.warning("Please enter a message to chat!")
 
+    elif app_mode == "Trivia":
+        st.title("🔋 Renewable Energy Trivia")
+        st.subheader("Let's test your knowledge!")
+
+        # Ask a trivia question
+        question = random.choice(quiz_data)
+        correct_answer = question["answer"]
+        user_answer = st.text_input(f"Q: {question['question']}")
+
+        if user_answer:
+            if user_answer.lower() == correct_answer:
+                st.success("Correct! 🎉")
+            else:
+                st.error(f"Oops! The correct answer was '{correct_answer}'. Better luck next time!")
+
     elif app_mode == "Chat History":
         st.title("📜 Chat History")
         if "chat_history" in st.session_state and st.session_state.chat_history:
@@ -183,23 +212,14 @@ def main():
                 if sender == "You":
                     st.markdown(f"**{sender}:** {message}")
                 else:
-                    st.markdown(f"**{sender}:** {message}")
+                    st.markdown(f"**Bot:** {message}")
         else:
-            st.info("No chat history found. Start a conversation on the Home page!")
+            st.warning("No chat history available.")
 
     elif app_mode == "About":
-        st.title("About Green Chat Bot")
-        st.write("""
-        🌱 **Green Chat Bot** is an interactive assistant designed to help you learn about renewable energy, certifications, 
-        job opportunities, and more. 
-
-        🤖 Features:
-        - Answer queries about renewable energy.
-        - Provide career guidance.
-        - Share fun facts about sustainability.
-
-        Built with **Streamlit** and **spaCy**.
-        """)
+        st.title("🌿 About This Bot 🌿")
+        st.write("This bot is designed to answer questions related to renewable energy, certifications, career opportunities, and trivia. Feel free to ask about solar, wind, hydropower, and other green energy topics.")
+        st.write("It also has a fun trivia section to test your knowledge!")
 
 if __name__ == "__main__":
     main()
