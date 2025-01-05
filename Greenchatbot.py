@@ -65,7 +65,7 @@ responses = {
         "The demand for skilled professionals in renewable energy is rapidly growing worldwide."
     ],
     "greeting": [
-        "Hello there! How can I assist you today?",
+        "Hello there! How can I assist you today with renewable energy questions?",
         "Hi! How can I help you with your renewable energy questions?",
         "Good day! What can I do for you?",
         "Hey! What would you like to know about renewable energy?"
