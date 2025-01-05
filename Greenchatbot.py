@@ -120,7 +120,7 @@ def get_response(intent):
         bot_response = random.choice(responses[intent])
         
         # Add fun fact randomly
-        if random.random() < 0.2:  # 20% chance to add a fun fact
+        if random.random() < 0.5:  # 20% chance to add a fun fact
             fun_fact = random.choice(fun_facts)
             return f"{bot_response}\n\nFun Fact: {fun_fact}"
 
