@@ -4,16 +4,20 @@ from spacy.training import Example
 import streamlit as st
 import time
 
-# Training data
+# Enhanced training data
 training_data = [
     ("Tell me about your courses", "course_info"),
     ("What training programs do you offer?", "course_info"),
-    ("I want career guidance", "career_guidance"),
-    ("What are the job opportunities?", "job_opportunities"),
-    ("How can I get certified?", "certification_help"),
-    ("What are the benefits of renewable energy?", "renewable_energy_advantages"),
+    ("Can you tell me about your courses?", "course_info"),
+    ("What are your courses in renewable energy?", "course_info"),
+    ("I need career guidance in renewable energy", "career_guidance"),
+    ("What job opportunities are available?", "job_opportunities"),
+    ("How can I get certified in renewable energy?", "certification_help"),
+    ("What certifications do you offer?", "certification_help"),
+    ("Tell me the benefits of renewable energy", "renewable_energy_advantages"),
+    ("What are the main benefits of renewable energy?", "renewable_energy_advantages"),
     ("What are the challenges of renewable energy?", "renewable_energy_challenges"),
-    ("Can you give me environmental tips?", "environmental_tips"),
+    ("Can you list some environmental tips?", "environmental_tips"),
     ("What are the latest trends in renewable energy?", "renewable_energy_trends"),
 ]
 
@@ -59,7 +63,7 @@ fun_facts = [
     "Hydropower is the oldest form of renewable energy, dating back to ancient Greece!"
 ]
 
-# Train spaCy model
+# Train spaCy model with more epochs and improved data
 def train_spacy_model():
     # Create a blank English NLP model
     nlp = spacy.blank("en")
@@ -75,7 +79,7 @@ def train_spacy_model():
     optimizer = nlp.begin_training()
 
     # Training loop for multiple iterations
-    for epoch in range(20):  # Increased the number of epochs for better learning
+    for epoch in range(30):  # Increased the number of epochs for better learning
         random.shuffle(training_data)
         losses = {}
         
@@ -85,7 +89,7 @@ def train_spacy_model():
             # Create an Example object to represent the input/output pair
             example = Example.from_dict(doc, {"cats": {label: 1.0}})
             # Update the model with the example and calculate losses
-            nlp.update([example], losses=losses, drop=0.2, sgd=optimizer)
+            nlp.update([example], losses=losses, drop=0.4, sgd=optimizer)
 
         # Print the loss after every epoch for monitoring the training
         print(f"Epoch {epoch} Losses {losses}")
@@ -96,7 +100,7 @@ def train_spacy_model():
 nlp_model = train_spacy_model()
 
 # Predict intent with confidence threshold
-def predict_intent(text, threshold=0.5):  # Lowered threshold
+def predict_intent(text, threshold=0.5):
     doc = nlp_model(text)
     predicted_label, confidence = max(doc.cats.items(), key=lambda item: item[1])
 
