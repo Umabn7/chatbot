@@ -194,16 +194,28 @@ def main():
         st.title("🔋 Renewable Energy Trivia")
         st.subheader("Let's test your knowledge!")
 
-        # Ask a trivia question
-        question = random.choice(quiz_data)
+        if "quiz_question" not in st.session_state:
+            st.session_state.quiz_question = random.choice(quiz_data)
+            st.session_state.user_answer = ""
+        
+        question = st.session_state.quiz_question
         correct_answer = question["answer"]
+
         user_answer = st.text_input(f"Q: {question['question']}")
 
         if user_answer:
             if user_answer.lower() == correct_answer:
                 st.success("Correct! 🎉")
+                st.session_state.quiz_question = random.choice(quiz_data)
+                st.session_state.user_answer = user_answer
+                st.session_state.chat_history.append(("You", user_answer))
+                st.session_state.chat_history.append(("Bot", f"Correct! The answer was '{correct_answer}'."))
             else:
                 st.error(f"Oops! The correct answer was '{correct_answer}'. Better luck next time!")
+                st.session_state.quiz_question = random.choice(quiz_data)
+                st.session_state.user_answer = user_answer
+                st.session_state.chat_history.append(("You", user_answer))
+                st.session_state.chat_history.append(("Bot", f"Incorrect! The correct answer was '{correct_answer}'."))
 
     elif app_mode == "Chat History":
         st.title("📜 Chat History")
