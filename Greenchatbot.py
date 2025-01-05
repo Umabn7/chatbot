@@ -1,9 +1,9 @@
 import random
-import streamlit as st
 import spacy
 from spacy.training import Example
+import streamlit as st
 
-# Data for training
+# Training data
 training_data = [
     ("Tell me about your courses", "course_info"),
     ("What training programs do you offer?", "course_info"),
@@ -13,56 +13,58 @@ training_data = [
     ("What are the benefits of renewable energy?", "renewable_energy_advantages"),
     ("What are the challenges of renewable energy?", "renewable_energy_challenges"),
     ("Can you give me environmental tips?", "environmental_tips"),
-    ("What are the latest trends in renewable energy?", "renewable_energy_trends")
+    ("What are the latest trends in renewable energy?", "renewable_energy_trends"),
 ]
 
 responses = {
     "course_info": [
-        "We offer solar energy, wind energy, and waste management courses.",
-        "Our courses include solar, wind energy, and waste management."
+        "📚 We offer solar energy, wind energy, and waste management courses.",
+        "🎓 Our courses include solar, wind energy, and waste management. Learn and grow!"
     ],
     "career_guidance": [
-        "The field of renewable energy is in high demand. Would you like any suggestions for certifications?",
-        "Green energy careers are booming nowadays, and roles like sustainability analyst and energy consultant are popular!"
+        "🚀 The field of renewable energy is in high demand. Would you like suggestions for certifications?",
+        "🌍 Green energy careers are booming! Popular roles include sustainability analyst and energy consultant."
     ],
     "certification_help": [
-        "You can apply for certifications. Would you like a link?",
-        "Green Certifications can boost your career. Apply and learn more!"
+        "✅ You can apply for certifications. Would you like a link?",
+        "🏅 Green certifications can boost your career. Apply today!"
     ],
     "renewable_energy_advantages": [
-        "Renewable energy reduces carbon emissions and helps combat climate change.",
-        "Using renewable energy can lower your electricity bills and promote energy independence."
+        "🌞 Renewable energy reduces carbon emissions and helps combat climate change.",
+        "💡 Lower electricity bills and promote energy independence with renewables!"
     ],
     "renewable_energy_challenges": [
-        "Some challenges include high initial setup costs and dependency on weather conditions.",
-        "Infrastructure and storage solutions are key challenges in renewable energy adoption."
+        "💸 Challenges include high setup costs and weather dependency.",
+        "🔑 Infrastructure and storage are key challenges in renewable energy adoption."
     ],
     "environmental_tips": [
-        "Save energy by switching off appliances when not in use.",
-        "Reduce waste by reusing and recycling materials wherever possible."
+        "🌱 Save energy by switching off appliances when not in use.",
+        "♻️ Reduce waste by reusing and recycling materials wherever possible."
     ],
     "renewable_energy_trends": [
-        "Solar and wind energy are leading the global renewable energy revolution.",
-        "Battery storage and green hydrogen are emerging trends in renewable energy."
+        "🌬️ Solar and wind energy are leading the global renewable energy revolution.",
+        "⚡ Battery storage and green hydrogen are emerging trends in renewable energy."
     ],
     "job_opportunities": [
-        "Popular roles include renewable energy engineer, solar technician, and energy auditor.",
-        "The demand for professionals in green energy fields is growing rapidly worldwide."
-    ]
+        "🛠️ Popular roles: Renewable energy engineer, solar technician, and energy auditor.",
+        "📈 The demand for professionals in green energy fields is growing rapidly!"
+    ],
 }
 
-# Train an NLP model using spaCy
-def train_spacy_model():
-    nlp = spacy.blank("en")  # Create a blank English NLP model
-    textcat = nlp.add_pipe("textcat", last=True)  # Add a Text Categorizer
+fun_facts = [
+    "💡 Did you know? The energy from the sun in one hour is enough to power the Earth for a year!",
+    "🌬️ Wind turbines can reach heights taller than the Statue of Liberty!",
+    "♻️ Recycling one aluminum can saves enough energy to power a TV for three hours."
+]
 
-    # Add labels to the text categorizer
+# Train spaCy model
+def train_spacy_model():
+    nlp = spacy.blank("en")
+    textcat = nlp.add_pipe("textcat", last=True)
     for _, label in training_data:
         textcat.add_label(label)
-
-    # Training
     optimizer = nlp.begin_training()
-    for i in range(10):  # Number of epochs
+    for _ in range(10):
         random.shuffle(training_data)
         losses = {}
         for text, label in training_data:
@@ -71,33 +73,59 @@ def train_spacy_model():
             nlp.update([example], losses=losses, drop=0.2, sgd=optimizer)
     return nlp
 
-# Load the trained model
+# Load model
 nlp_model = train_spacy_model()
 
-# Predict the intent of user input
+# Predict intent
 def predict_intent(text):
     doc = nlp_model(text)
     predicted_label = max(doc.cats, key=doc.cats.get)
     return predicted_label
 
-# Get a response based on the intent
+# Get response
 def get_response(intent):
-    return random.choice(responses[intent]) if intent in responses else "Sorry, I didn't understand. Can you rephrase?"
+    return random.choice(responses[intent]) if intent in responses else "🤔 Sorry, I didn't understand. Can you rephrase?"
 
 # Streamlit app
 def main():
-    st.title("Green Chat Bot with NLP")
-    st.subheader("Ask me about courses, career guidance, certifications, and more!")
+    st.markdown("<h1 style='text-align: center; color: green;'>🌿 Green Chat Bot 🌿</h1>", unsafe_allow_html=True)
+    st.subheader("Ask me about courses, careers, certifications, and more!")
 
-    user_input = st.text_input("Your message:")
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+
+    user_input = st.text_input("Your message:", key="user_input")
 
     if st.button("Send"):
         if user_input.strip():
             intent = predict_intent(user_input)
             response = get_response(intent)
-            st.text_area("Chatbot Response:", response, height=100)
+
+            # Store conversation history
+            st.session_state.chat_history.append(("You", user_input))
+            st.session_state.chat_history.append(("Bot", response))
+
+            # Display chat history with a simulated dynamic animation
+            st.write("### Chat History")
+            for sender, message in st.session_state.chat_history:
+                if sender == "You":
+                    st.markdown(f"**{sender}:** {message}")
+                else:
+                    # Simulated typing effect with ellipsis
+                    placeholder = st.empty()
+                    for _ in range(3):
+                        placeholder.markdown(f"**{sender}:** {message[:5]}{'...' * _}")
+                        st.experimental_rerun()  # Refresh Streamlit rendering
+                    placeholder.markdown(f"**{sender}:** {message}")
+
+            # Randomly share a fun fact
+            if random.random() < 0.3:  # 30% chance to share a fun fact
+                fun_fact = random.choice(fun_facts)
+                st.markdown(f"🤓 **Fun Fact:** {fun_fact}")
         else:
             st.warning("Please enter a message to chat!")
+
+    st.markdown("<footer style='text-align: center; margin-top: 30px;'>💡 Powered by AI | Renewable Energy Enthusiast 🌱</footer>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
