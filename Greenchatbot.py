@@ -94,49 +94,33 @@ def get_response(intent):
 
 # Streamlit app
 def main():
-    st.set_page_config(page_title="Green Chat Bot", page_icon="🌿", layout="wide")
-    
-    # Sidebar for navigation
     st.sidebar.title("Navigation")
     app_mode = st.sidebar.radio("Go to", ["Home", "Chat History", "About"])
 
     if app_mode == "Home":
-        # Home page for chatting
         st.title("🌿 Green Chat Bot 🌿")
         st.subheader("Ask me about renewable energy, certifications, careers, and more!")
-        st.markdown("___")
-        
+
         if "chat_history" not in st.session_state:
             st.session_state.chat_history = []
-        
-        user_input = st.text_input("Your message:", key="user_input", label_visibility="collapsed")
 
-        col1, col2 = st.columns([6, 1])
-        with col2:
-            if st.button("Send"):
-                if user_input.strip():
-                    intent = predict_intent(user_input)
-                    response = get_response(intent)
+        user_input = st.text_input("Your message:")
 
-                    # Save to chat history
-                    st.session_state.chat_history.append(("You", user_input))
-                    st.session_state.chat_history.append(("Bot", response))
+        if st.button("Send"):
+            if user_input.strip():
+                intent = predict_intent(user_input)
+                response = get_response(intent)
 
-                    # Display response with improved visibility
-                    with st.container():
-                        st.write("### Bot Response")
-                        st.markdown(f"""
-                        <div style="background-color: #e0f7fa; padding: 20px; border-radius: 10px; border: 2px solid #00796b; font-size: 1.2em; font-weight: bold; max-width: 600px; word-wrap: break-word;">
-                            **Bot:** {response}
-                        </div>
-                        """, unsafe_allow_html=True)
-                else:
-                    st.warning("Please enter a message to chat!")
+                # Save to chat history
+                st.session_state.chat_history.append(("You", user_input))
+                st.session_state.chat_history.append(("Bot", response))
 
-        st.markdown("___")
+                st.write("### Bot Response")
+                st.markdown(f"**Bot:** {response}")
+            else:
+                st.warning("Please enter a message to chat!")
 
     elif app_mode == "Chat History":
-        # Chat history page
         st.title("📜 Chat History")
         if "chat_history" in st.session_state and st.session_state.chat_history:
             for sender, message in st.session_state.chat_history:
@@ -147,29 +131,19 @@ def main():
         else:
             st.info("No chat history found. Start a conversation on the Home page!")
 
-        st.markdown("___")
-
     elif app_mode == "About":
-        # About page
         st.title("About Green Chat Bot")
-        st.markdown("""
+        st.write("""
         🌱 **Green Chat Bot** is an interactive assistant designed to help you learn about renewable energy, certifications, 
-        job opportunities, and more.
+        job opportunities, and more. 
 
-        ### 🤖 Features:
+        🤖 Features:
         - Answer queries about renewable energy.
         - Provide career guidance.
         - Share fun facts about sustainability.
-        - Improve the chat experience using NLP.
 
-        **Technologies**:
-        - Built with **Streamlit** for the interface.
-        - Powered by **spaCy** for natural language processing.
-
-        Thank you for using the Green Chat Bot! 🌍💡
+        Built with **Streamlit** and **spaCy**.
         """)
-
-        st.markdown("___")
 
 if __name__ == "__main__":
     main()
