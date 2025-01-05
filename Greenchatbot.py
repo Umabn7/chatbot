@@ -1,137 +1,82 @@
 import random
 import spacy
+import json
 from spacy.training import Example
 import streamlit as st
 
-# Enhanced training data with more specific examples
-training_data = [
-    ("Tell me about your courses", "course_info"),
-    ("What training programs do you offer?", "course_info"),
-    ("Can you tell me about your courses?", "course_info"),
-    ("What are your courses in renewable energy?", "course_info"),
-    ("I want to learn about solar energy courses", "course_info"),
-    ("What courses do you have for wind energy?", "course_info"),
-    ("I need career guidance in renewable energy", "career_guidance"),
-    ("What job opportunities are available in renewable energy?", "job_opportunities"),
-    ("How can I get certified in renewable energy?", "certification_help"),
-    ("What certifications do you offer?", "certification_help"),
-    ("Tell me the benefits of renewable energy", "renewable_energy_advantages"),
-    ("What are the main benefits of renewable energy?", "renewable_energy_advantages"),
-    ("What are the challenges of renewable energy?", "renewable_energy_challenges"),
-    ("Can you list some environmental tips?", "environmental_tips"),
-    ("What are the latest trends in renewable energy?", "renewable_energy_trends"),
-    ("Can you help me with my career path?", "career_guidance"),
-    ("How do I pursue a career in renewable energy?", "career_guidance"),
-]
+# Load intents and responses from intents.json
+with open('intents.json') as file:
+    data = json.load(file)
 
-responses = {
-    "course_info": [
-        "We offer courses on solar energy, wind energy, and waste management.",
-        "Our training programs include solar energy, wind energy, and waste management. Learn and grow!"
-    ],
-    "career_guidance": [
-        "The renewable energy field is booming! Would you like suggestions for certifications or job roles?",
-        "Green energy careers are in high demand. Roles like sustainability analyst and energy consultant are popular!"
-    ],
-    "certification_help": [
-        "You can apply for certifications in renewable energy. Would you like a link?",
-        "Green certifications are great for boosting your career. Learn more and get certified!"
-    ],
-    "renewable_energy_advantages": [
-        "Renewable energy helps combat climate change by reducing carbon emissions.",
-        "Using renewable energy can lower your electricity bills and promote energy independence."
-    ],
-    "renewable_energy_challenges": [
-        "Challenges include high initial setup costs and weather dependency.",
-        "Infrastructure and energy storage solutions remain critical challenges in renewable energy adoption."
-    ],
-    "environmental_tips": [
-        "Switch off appliances when not in use to save energy.",
-        "Reuse and recycle materials wherever possible to reduce waste."
-    ],
-    "renewable_energy_trends": [
-        "Solar and wind energy are driving the renewable energy revolution.",
-        "Battery storage and green hydrogen are emerging as the next big trends in renewable energy."
-    ],
-    "job_opportunities": [
-        "Popular roles include renewable energy engineer, solar technician, and energy auditor.",
-        "The demand for skilled professionals in renewable energy is rapidly growing worldwide."
-    ],
-}
+# Convert loaded intents into a more usable format
+intents = data['intents']
 
-fun_facts = [
-    "Did you know? The energy from the sun in one hour is enough to power the Earth for a year!",
-    "Wind turbines can reach heights taller than the Statue of Liberty!",
-    "Recycling one aluminum can saves enough energy to power a TV for three hours.",
-    "Hydropower is the oldest form of renewable energy, dating back to ancient Greece!"
-]
+# Create a list of training examples
+training_data = []
+responses = {}
 
-# Train spaCy model with more epochs and improved data
-def train_spacy_model():
-    # Create a blank English NLP model
-    nlp = spacy.blank("en")
+for intent in intents:
+    for example in intent['examples']:
+        training_data.append((example, intent['intent']))
     
-    # Add text classification pipe to the model
+    # Store responses for each intent
+    responses[intent['intent']] = intent['responses']
+
+# Function to train the spaCy model
+def train_spacy_model():
+    nlp = spacy.blank("en")
     textcat = nlp.add_pipe("textcat", last=True)
     
-    # Add labels to the text classifier
-    for _, label in training_data:
-        textcat.add_label(label)
+    # Add labels from the intents file
+    for intent in intents:
+        textcat.add_label(intent['intent'])
     
-    # Start training
     optimizer = nlp.begin_training()
-
-    # Training loop for multiple iterations
-    for epoch in range(30):  # Increased the number of epochs for better learning
+    
+    for epoch in range(30):  # More epochs for better learning
         random.shuffle(training_data)
         losses = {}
-        
         for text, label in training_data:
-            # Create a doc from the input text
             doc = nlp.make_doc(text)
-            # Create an Example object to represent the input/output pair
             example = Example.from_dict(doc, {"cats": {label: 1.0}})
-            # Update the model with the example and calculate losses
             nlp.update([example], losses=losses, drop=0.4, sgd=optimizer)
-
-        # Print the loss after every epoch for monitoring the training
         print(f"Epoch {epoch} Losses {losses}")
-        
+    
     return nlp
 
-# Load model
+# Load the trained model
 nlp_model = train_spacy_model()
 
-# Predict intent with confidence threshold
+# Function to predict intent with confidence threshold
 def predict_intent(text, threshold=0.5):
     doc = nlp_model(text)
     predicted_label, confidence = max(doc.cats.items(), key=lambda item: item[1])
-
-    # Debugging: print the confidence of predictions for debugging
+    
+    # Print for debugging purposes
     print(f"Prediction: {predicted_label}, Confidence: {confidence}")
     
     if confidence < threshold:
         return "irrelevant"  # If confidence is low, classify as irrelevant
     return predicted_label
 
-# Get response with fun fact randomly
+# Get a response based on the intent
 def get_response(intent):
     if intent == "irrelevant":
         return "I'm sorry, I didn't quite catch that. Could you rephrase?"
     
-    # Select response based on intent
+    # Select a response from the predefined responses
     if intent in responses:
         bot_response = random.choice(responses[intent])
         
-        # Add fun fact randomly with a higher chance
-        if random.random() < 0.4:  # 40% chance to add a fun fact
-            fun_fact = random.choice(fun_facts)
+        # Fun facts logic - Add 50% chance to return a fun fact
+        if random.random() < 0.5:  # 50% chance
+            fun_fact = random.choice(responses["fun_facts"])
             return f"{bot_response}\n\nFun Fact: {fun_fact}"
 
         return bot_response
     return "I'm sorry, I didn't quite catch that. Could you rephrase?"
 
-# Streamlit app
+# Streamlit app for displaying the chat interface
 def main():
     st.sidebar.title("Navigation")
     app_mode = st.sidebar.radio("Go to", ["Home", "Chat History", "About"])
@@ -148,7 +93,6 @@ def main():
         if st.button("Send"):
             if user_input.strip():
                 intent = predict_intent(user_input)
-
                 response = get_response(intent)
 
                 # Save to chat history
