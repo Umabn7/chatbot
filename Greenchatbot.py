@@ -3,14 +3,16 @@ import spacy
 from spacy.training import Example
 import streamlit as st
 
-# Enhanced training data
+# Enhanced training data with more specific examples
 training_data = [
     ("Tell me about your courses", "course_info"),
     ("What training programs do you offer?", "course_info"),
     ("Can you tell me about your courses?", "course_info"),
     ("What are your courses in renewable energy?", "course_info"),
+    ("I want to learn about solar energy courses", "course_info"),
+    ("What courses do you have for wind energy?", "course_info"),
     ("I need career guidance in renewable energy", "career_guidance"),
-    ("What job opportunities are available?", "job_opportunities"),
+    ("What job opportunities are available in renewable energy?", "job_opportunities"),
     ("How can I get certified in renewable energy?", "certification_help"),
     ("What certifications do you offer?", "certification_help"),
     ("Tell me the benefits of renewable energy", "renewable_energy_advantages"),
@@ -18,6 +20,8 @@ training_data = [
     ("What are the challenges of renewable energy?", "renewable_energy_challenges"),
     ("Can you list some environmental tips?", "environmental_tips"),
     ("What are the latest trends in renewable energy?", "renewable_energy_trends"),
+    ("Can you help me with my career path?", "career_guidance"),
+    ("How do I pursue a career in renewable energy?", "career_guidance"),
 ]
 
 responses = {
@@ -119,8 +123,8 @@ def get_response(intent):
     if intent in responses:
         bot_response = random.choice(responses[intent])
         
-        # Add fun fact randomly
-        if random.random() < 0.5:  # 20% chance to add a fun fact
+        # Add fun fact randomly with a higher chance
+        if random.random() < 0.4:  # 40% chance to add a fun fact
             fun_fact = random.choice(fun_facts)
             return f"{bot_response}\n\nFun Fact: {fun_fact}"
 
