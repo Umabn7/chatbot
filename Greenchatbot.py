@@ -3,7 +3,7 @@ import spacy
 from spacy.training import Example
 import streamlit as st
 
-# Enhanced training data with more specific examples
+# Enhanced training data with more specific examples including greetings
 training_data = [
     ("Tell me about your courses", "course_info"),
     ("What training programs do you offer?", "course_info"),
@@ -22,6 +22,13 @@ training_data = [
     ("What are the latest trends in renewable energy?", "renewable_energy_trends"),
     ("Can you help me with my career path?", "career_guidance"),
     ("How do I pursue a career in renewable energy?", "career_guidance"),
+    ("Hello", "greeting"),
+    ("Hi", "greeting"),
+    ("Good morning", "greeting"),
+    ("Good evening", "greeting"),
+    ("Hey", "greeting"),
+    ("How are you?", "greeting"),
+    ("What's up?", "greeting"),
 ]
 
 responses = {
@@ -56,6 +63,12 @@ responses = {
     "job_opportunities": [
         "Popular roles include renewable energy engineer, solar technician, and energy auditor.",
         "The demand for skilled professionals in renewable energy is rapidly growing worldwide."
+    ],
+    "greeting": [
+        "Hello there! How can I assist you today?",
+        "Hi! How can I help you with your renewable energy questions?",
+        "Good day! What can I do for you?",
+        "Hey! What would you like to know about renewable energy?"
     ],
 }
 
