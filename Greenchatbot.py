@@ -14,6 +14,9 @@ training_data = [
     ("What are the challenges of renewable energy?", "renewable_energy_challenges"),
     ("Can you give me environmental tips?", "environmental_tips"),
     ("What are the latest trends in renewable energy?", "renewable_energy_trends"),
+    ("What is renewable energy?", "renewable_energy_advantages"),
+    ("Tell me a joke!", "irrelevant"),
+    ("What do you think about pizza?", "irrelevant"),
 ]
 
 responses = {
@@ -49,6 +52,10 @@ responses = {
         "Popular roles include renewable energy engineer, solar technician, and energy auditor.",
         "The demand for skilled professionals in renewable energy is rapidly growing worldwide."
     ],
+    "irrelevant": [
+        "I'm sorry, I didn't quite catch that. Could you rephrase?",
+        "I didn't understand your question. Can you please clarify?"
+    ]
 }
 
 fun_facts = [
@@ -81,13 +88,17 @@ nlp_model = train_spacy_model()
 def predict_intent(text):
     doc = nlp_model(text)
     predicted_label = max(doc.cats, key=doc.cats.get)
+    
+    # If confidence is below threshold, return 'irrelevant' (indicating the bot can't understand)
+    if doc.cats[predicted_label] < 0.5:  # Adjust threshold as necessary
+        return "irrelevant"
+    
     return predicted_label
 
 # Get response
 def get_response(intent):
     if intent in responses:
-        bot_response = random.choice(responses[intent])
-        return bot_response
+        return random.choice(responses[intent])
     return "I'm sorry, I didn't quite catch that. Could you rephrase?"
 
 # Streamlit app
@@ -125,9 +136,9 @@ def main():
                         fun_fact = random.choice(fun_facts)
                         response += f"\n\n**Fun Fact:** {fun_fact}"
 
-                    # Display response
+                    # Display response with improved visibility
                     st.write("### Bot Response")
-                    st.markdown(f"**Bot:** {response}")
+                    st.markdown(f"<div style='background-color: #e0f7fa; padding: 10px; border-radius: 10px; border: 2px solid #00796b; font-size: 1.2em;'>**Bot:** {response}</div>", unsafe_allow_html=True)
                 else:
                     st.warning("Please enter a message to chat!")
 
