@@ -1,13 +1,28 @@
 import random
 import streamlit as st
+import spacy
+from spacy.training import Example
 
-intents = {
+# Data for training
+training_data = [
+    ("Tell me about your courses", "course_info"),
+    ("What training programs do you offer?", "course_info"),
+    ("I want career guidance", "career_guidance"),
+    ("What are the job opportunities?", "job_opportunities"),
+    ("How can I get certified?", "certification_help"),
+    ("What are the benefits of renewable energy?", "renewable_energy_advantages"),
+    ("What are the challenges of renewable energy?", "renewable_energy_challenges"),
+    ("Can you give me environmental tips?", "environmental_tips"),
+    ("What are the latest trends in renewable energy?", "renewable_energy_trends")
+]
+
+responses = {
     "course_info": [
-        "We offer solar energy, wind energy and waste management courses.",
-        "Our courses include solar, wind energy and waste management."
+        "We offer solar energy, wind energy, and waste management courses.",
+        "Our courses include solar, wind energy, and waste management."
     ],
     "career_guidance": [
-        "The field of renewable energy is in high demand. Would you like any suggestions for certifications?!",
+        "The field of renewable energy is in high demand. Would you like any suggestions for certifications?",
         "Green energy careers are booming nowadays, and roles like sustainability analyst and energy consultant are popular!"
     ],
     "certification_help": [
@@ -36,34 +51,50 @@ intents = {
     ]
 }
 
-keywords = {
-    "course_info": ["course", "training", "program"],
-    "career_guidance": ["career", "job", "guidance"],
-    "certification_help": ["certification", "certificate", "certified"],
-    "renewable_energy_advantages": ["advantages", "benefits", "pros"],
-    "renewable_energy_challenges": ["challenges", "problems", "issues"],
-    "environmental_tips": ["tips", "environment", "save"],
-    "renewable_energy_trends": ["trends", "latest", "update"],
-    "job_opportunities": ["job", "roles", "opportunity"]
-}
+# Train an NLP model using spaCy
+def train_spacy_model():
+    nlp = spacy.blank("en")  # Create a blank English NLP model
+    textcat = nlp.add_pipe("textcat", last=True)  # Add a Text Categorizer
 
-def get_response(user_input):
-    user_input = user_input.lower()
-    for intent, words in keywords.items():
-        if any(word in user_input for word in words):
-            return random.choice(intents[intent])
-    return "Sorry, I didn't understand. Can you rephrase your question?"
+    # Add labels to the text categorizer
+    for _, label in training_data:
+        textcat.add_label(label)
 
+    # Training
+    optimizer = nlp.begin_training()
+    for i in range(10):  # Number of epochs
+        random.shuffle(training_data)
+        losses = {}
+        for text, label in training_data:
+            doc = nlp.make_doc(text)
+            example = Example.from_dict(doc, {"cats": {label: 1.0}})
+            nlp.update([example], losses=losses, drop=0.2, sgd=optimizer)
+    return nlp
 
+# Load the trained model
+nlp_model = train_spacy_model()
+
+# Predict the intent of user input
+def predict_intent(text):
+    doc = nlp_model(text)
+    predicted_label = max(doc.cats, key=doc.cats.get)
+    return predicted_label
+
+# Get a response based on the intent
+def get_response(intent):
+    return random.choice(responses[intent]) if intent in responses else "Sorry, I didn't understand. Can you rephrase?"
+
+# Streamlit app
 def main():
-    st.title("Green Chat Bot")
+    st.title("Green Chat Bot with NLP")
     st.subheader("Ask me about courses, career guidance, certifications, and more!")
 
     user_input = st.text_input("Your message:")
 
     if st.button("Send"):
         if user_input.strip():
-            response = get_response(user_input)
+            intent = predict_intent(user_input)
+            response = get_response(intent)
             st.text_area("Chatbot Response:", response, height=100)
         else:
             st.warning("Please enter a message to chat!")
